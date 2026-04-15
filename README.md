@@ -34,11 +34,10 @@ This project demonstrates how HR datasets can be transformed into actionable ins
 
 ---
 
-## 🌐 Interactive Dashboard
-Preview of the interactive HTML dashboard:  
-![Interactive Dashboard](i:turn0image33)
-
 Open the HTML file locally to explore the interactive dashboard:
 
 ```bash
 HR Analytics Dashboard.html
+
+
+Isha Soni
