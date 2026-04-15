@@ -30,7 +30,7 @@ This project demonstrates how HR datasets can be transformed into actionable ins
 ---
 
 ## 🖼️ Dashboard Preview
-![Dashboard](i:turn0image1)
+![Dashboard](Dashboard.png)
 
 ---
 
