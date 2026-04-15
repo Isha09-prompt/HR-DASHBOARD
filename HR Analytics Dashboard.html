@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///C:/Users/YOGA/Downloads/hr_dashboard.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Analytics Dashboard</title>
+<script src="./HR Analytics Dashboard_files/chart.umd.min.js.download"></script>
+<link href="./HR Analytics Dashboard_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #141728;
+    --surface2: #1c2035;
+    --border: #252a40;
+    --accent1: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffc542;
+    --text: #e8eaf6;
+    --text-muted: #7b82a8;
+    --card-radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1d35 0%, #0d0f1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .header-left h1 span { color: var(--accent1); }
+  .header-left p { color: var(--text-muted); font-size: 13px; margin-top: 3px; font-family:'Space Mono',monospace; }
+  .live-badge {
+    background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.3);
+    color: var(--accent2); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .live-dot { width: 7px; height: 7px; background: var(--accent2); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+  /* FILTERS */
+  .filters-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .filter-label { color: var(--text-muted); font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .slicer-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .slicer-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .2s; font-family: inherit;
+  }
+  .slicer-btn:hover { border-color: var(--accent1); color: var(--text); }
+  .slicer-btn.active { background: var(--accent1); border-color: var(--accent1); color: #fff; }
+  .filter-divider { width: 1px; height: 24px; background: var(--border); }
+  .reset-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--accent3);
+    background: rgba(255,107,107,0.08); color: var(--accent3); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .2s; font-family: inherit;
+  }
+  .reset-btn:hover { background: rgba(255,107,107,0.2); }
+
+  /* MAIN */
+  .main { padding: 28px 32px; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 20px 22px;
+    position: relative; overflow: hidden;
+    transition: transform .2s, border-color .2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--accent1); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+  }
+  .kpi-card.c1::before { background: var(--accent1); }
+  .kpi-card.c2::before { background: var(--accent2); }
+  .kpi-card.c3::before { background: var(--accent3); }
+  .kpi-card.c4::before { background: var(--accent4); }
+  .kpi-card.c5::before { background: #ff9ff3; }
+  .kpi-card.c6::before { background: #54a0ff; }
+  .kpi-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .kpi-card.c1 .kpi-icon { background: rgba(108,99,255,0.15); }
+  .kpi-card.c2 .kpi-icon { background: rgba(0,212,170,0.15); }
+  .kpi-card.c3 .kpi-icon { background: rgba(255,107,107,0.15); }
+  .kpi-card.c4 .kpi-icon { background: rgba(255,197,66,0.15); }
+  .kpi-card.c5 .kpi-icon { background: rgba(255,159,243,0.15); }
+  .kpi-card.c6 .kpi-icon { background: rgba(84,160,255,0.15); }
+  .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; }
+  .kpi-value { font-size: 28px; font-weight: 800; margin: 6px 0 4px; font-family: 'Space Mono', monospace; letter-spacing: -1px; }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); }
+
+  /* CHARTS GRID */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .charts-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 22px;
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 14px; font-weight: 700; color: var(--text);
+    margin-bottom: 4px; letter-spacing: -.2px;
+  }
+  .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+  .chart-container { position: relative; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    .header { padding: 14px 16px; flex-wrap: wrap; gap: 12px; }
+    .filters-bar { padding: 12px 16px; }
+  }
+
+  /* NO DATA */
+  .no-data { display: flex; align-items: center; justify-content: center; height: 180px; color: var(--text-muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <h1>HR <span>Analytics</span> Dashboard</h1>
+    <p>100 employees · 5 departments · 4 recruitment sources</p>
+  </div>
+  <div class="live-badge"><span class="live-dot"></span>Live Data</div>
+</header>
+
+<div class="filters-bar">
+  <span class="filter-label">Department</span>
+  <div class="slicer-group" id="dept-slicers"><button class="slicer-btn">Finance</button><button class="slicer-btn">Operations</button><button class="slicer-btn">IT</button><button class="slicer-btn">Sales</button><button class="slicer-btn">HR</button></div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Recruitment</span>
+  <div class="slicer-group" id="rec-slicers"><button class="slicer-btn">LinkedIn</button><button class="slicer-btn">Job Portal</button><button class="slicer-btn">Referral</button><button class="slicer-btn">Campus</button></div>
+  <div class="filter-divider"></div>
+  <button class="reset-btn" onclick="resetFilters()">✕ Reset</button>
+</div>
+
+<div class="main">
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card c1">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-label">Total Employees</div>
+      <div class="kpi-value">100</div>
+      <div class="kpi-sub">in current filter</div>
+    </div>
+  
+    <div class="kpi-card c3">
+      <div class="kpi-icon">📉</div>
+      <div class="kpi-label">Attrition Rate</div>
+      <div class="kpi-value">23.0%</div>
+      <div class="kpi-sub">23 employees left</div>
+    </div>
+  
+    <div class="kpi-card c4">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Avg Monthly Salary</div>
+      <div class="kpi-value">₹78,288</div>
+      <div class="kpi-sub">across all departments</div>
+    </div>
+  
+    <div class="kpi-card c2">
+      <div class="kpi-icon">😊</div>
+      <div class="kpi-label">Avg Satisfaction</div>
+      <div class="kpi-value">5.5/10</div>
+      <div class="kpi-sub">employee satisfaction score</div>
+    </div>
+  
+    <div class="kpi-card c5">
+      <div class="kpi-icon">⭐</div>
+      <div class="kpi-label">Avg Performance</div>
+      <div class="kpi-value">2.9/5</div>
+      <div class="kpi-sub">performance rating avg</div>
+    </div>
+  
+    <div class="kpi-card c6">
+      <div class="kpi-icon">🚀</div>
+      <div class="kpi-label">Promoted</div>
+      <div class="kpi-value">51</div>
+      <div class="kpi-sub">of 100 employees</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Bar + Pie -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Headcount by Department</div>
+      <div class="chart-sub">Employee distribution across departments</div>
+      <div class="chart-container"><canvas id="deptBar" height="598" style="box-sizing: border-box; display: block; height: 399px; width: 544px;" width="816"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Recruitment Source Mix</div>
+      <div class="chart-sub">Where employees were hired from</div>
+      <div class="chart-container"><canvas id="recruitPie" height="817" style="box-sizing: border-box; display: block; height: 545px; width: 545px;" width="817"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Attrition Bar + Engagement Pie -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Attrition by Department</div>
+      <div class="chart-sub">Employees who left vs stayed per department</div>
+      <div class="chart-container"><canvas id="attritionBar" height="598" style="box-sizing: border-box; display: block; height: 399px; width: 544px;" width="816"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Engagement Level Distribution</div>
+      <div class="chart-sub">Low / Medium / High engagement breakdown</div>
+      <div class="chart-container"><canvas id="engagePie" height="817" style="box-sizing: border-box; display: block; height: 545px; width: 545px;" width="817"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Salary Bar + Gender Pie + Promotion Bar -->
+  <div class="charts-grid-3">
+    <div class="chart-card">
+      <div class="chart-title">Avg Salary by Department</div>
+      <div class="chart-sub">Monthly salary comparison</div>
+      <div class="chart-container"><canvas id="salaryBar" height="375" style="box-sizing: border-box; display: block; height: 250px; width: 340px;" width="510"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Gender Split</div>
+      <div class="chart-sub">Male vs Female distribution</div>
+      <div class="chart-container"><canvas id="genderPie" height="511" style="box-sizing: border-box; display: block; height: 341px; width: 341px;" width="511"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Promotion Status</div>
+      <div class="chart-sub">Promoted vs Not Promoted</div>
+      <div class="chart-container"><canvas id="promotionPie" height="511" style="box-sizing: border-box; display: block; height: 341px; width: 341px;" width="511"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Row 4: Performance Bar full width -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Avg Performance Rating by Source</div>
+      <div class="chart-sub">Which recruitment channel produces higher performers</div>
+      <div class="chart-container"><canvas id="perfBar" height="544" style="box-sizing: border-box; display: block; height: 363px; width: 544px;" width="816"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Avg Satisfaction Score by Department</div>
+      <div class="chart-sub">Employee satisfaction levels across departments</div>
+      <div class="chart-container"><canvas id="satBar" height="544" style="box-sizing: border-box; display: block; height: 363px; width: 544px;" width="816"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW = [{"employee_id":"E001","department":"Finance","gender":"Female","age":48,"experience_years":17,"monthly_salary":31655,"satisfaction_score":7,"training_hours":23,"attendance_percent":94,"performance_rating":5,"overtime_hours":18,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E002","department":"Operations","gender":"Male","age":30,"experience_years":2,"monthly_salary":95031,"satisfaction_score":6,"training_hours":53,"attendance_percent":93,"performance_rating":2,"overtime_hours":18,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E003","department":"IT","gender":"Male","age":26,"experience_years":1,"monthly_salary":101429,"satisfaction_score":4,"training_hours":40,"attendance_percent":70,"performance_rating":1,"overtime_hours":20,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E004","department":"Operations","gender":"Female","age":22,"experience_years":16,"monthly_salary":116083,"satisfaction_score":6,"training_hours":16,"attendance_percent":75,"performance_rating":3,"overtime_hours":4,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E005","department":"Operations","gender":"Female","age":40,"experience_years":12,"monthly_salary":112922,"satisfaction_score":9,"training_hours":45,"attendance_percent":90,"performance_rating":3,"overtime_hours":17,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E006","department":"Sales","gender":"Female","age":31,"experience_years":5,"monthly_salary":80766,"satisfaction_score":4,"training_hours":23,"attendance_percent":75,"performance_rating":1,"overtime_hours":9,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E007","department":"IT","gender":"Male","age":33,"experience_years":5,"monthly_salary":38403,"satisfaction_score":4,"training_hours":16,"attendance_percent":95,"performance_rating":5,"overtime_hours":21,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E008","department":"IT","gender":"Female","age":45,"experience_years":9,"monthly_salary":57097,"satisfaction_score":5,"training_hours":13,"attendance_percent":81,"performance_rating":1,"overtime_hours":20,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E009","department":"IT","gender":"Male","age":36,"experience_years":9,"monthly_salary":103657,"satisfaction_score":4,"training_hours":11,"attendance_percent":82,"performance_rating":2,"overtime_hours":5,"attrition":"No","recruitment_source":"Referral","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E010","department":"Operations","gender":"Male","age":48,"experience_years":3,"monthly_salary":35966,"satisfaction_score":3,"training_hours":32,"attendance_percent":82,"performance_rating":1,"overtime_hours":0,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E011","department":"Finance","gender":"Female","age":43,"experience_years":19,"monthly_salary":118848,"satisfaction_score":7,"training_hours":18,"attendance_percent":98,"performance_rating":3,"overtime_hours":4,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E012","department":"IT","gender":"Female","age":45,"experience_years":16,"monthly_salary":77921,"satisfaction_score":7,"training_hours":35,"attendance_percent":84,"performance_rating":1,"overtime_hours":8,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E013","department":"Operations","gender":"Male","age":30,"experience_years":16,"monthly_salary":74726,"satisfaction_score":6,"training_hours":56,"attendance_percent":90,"performance_rating":5,"overtime_hours":11,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E014","department":"Sales","gender":"Male","age":41,"experience_years":3,"monthly_salary":75300,"satisfaction_score":9,"training_hours":23,"attendance_percent":85,"performance_rating":4,"overtime_hours":13,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E015","department":"Finance","gender":"Female","age":38,"experience_years":1,"monthly_salary":47677,"satisfaction_score":4,"training_hours":51,"attendance_percent":91,"performance_rating":1,"overtime_hours":1,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E016","department":"Sales","gender":"Female","age":38,"experience_years":11,"monthly_salary":80609,"satisfaction_score":3,"training_hours":20,"attendance_percent":90,"performance_rating":5,"overtime_hours":16,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E017","department":"Finance","gender":"Female","age":47,"experience_years":17,"monthly_salary":81661,"satisfaction_score":6,"training_hours":57,"attendance_percent":80,"performance_rating":5,"overtime_hours":13,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E018","department":"Operations","gender":"Male","age":41,"experience_years":8,"monthly_salary":56024,"satisfaction_score":5,"training_hours":9,"attendance_percent":97,"performance_rating":3,"overtime_hours":12,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E019","department":"HR","gender":"Male","age":33,"experience_years":4,"monthly_salary":95313,"satisfaction_score":6,"training_hours":39,"attendance_percent":74,"performance_rating":5,"overtime_hours":8,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E020","department":"Finance","gender":"Male","age":28,"experience_years":6,"monthly_salary":78006,"satisfaction_score":6,"training_hours":16,"attendance_percent":73,"performance_rating":5,"overtime_hours":24,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E021","department":"Sales","gender":"Male","age":23,"experience_years":8,"monthly_salary":40338,"satisfaction_score":4,"training_hours":29,"attendance_percent":72,"performance_rating":5,"overtime_hours":14,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E022","department":"Operations","gender":"Male","age":24,"experience_years":3,"monthly_salary":93027,"satisfaction_score":5,"training_hours":56,"attendance_percent":88,"performance_rating":5,"overtime_hours":24,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E023","department":"Finance","gender":"Male","age":38,"experience_years":16,"monthly_salary":117772,"satisfaction_score":6,"training_hours":25,"attendance_percent":89,"performance_rating":2,"overtime_hours":21,"attrition":"No","recruitment_source":"Campus","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E024","department":"HR","gender":"Female","age":26,"experience_years":3,"monthly_salary":105135,"satisfaction_score":3,"training_hours":40,"attendance_percent":94,"performance_rating":2,"overtime_hours":14,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E025","department":"HR","gender":"Male","age":38,"experience_years":18,"monthly_salary":44508,"satisfaction_score":3,"training_hours":57,"attendance_percent":87,"performance_rating":3,"overtime_hours":23,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E026","department":"IT","gender":"Male","age":45,"experience_years":14,"monthly_salary":28051,"satisfaction_score":7,"training_hours":27,"attendance_percent":84,"performance_rating":1,"overtime_hours":10,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E027","department":"IT","gender":"Male","age":38,"experience_years":18,"monthly_salary":73747,"satisfaction_score":5,"training_hours":20,"attendance_percent":78,"performance_rating":5,"overtime_hours":15,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E028","department":"Sales","gender":"Female","age":48,"experience_years":2,"monthly_salary":112142,"satisfaction_score":5,"training_hours":43,"attendance_percent":86,"performance_rating":1,"overtime_hours":16,"attrition":"Yes","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E029","department":"Finance","gender":"Male","age":38,"experience_years":3,"monthly_salary":112235,"satisfaction_score":7,"training_hours":49,"attendance_percent":83,"performance_rating":1,"overtime_hours":3,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E030","department":"Finance","gender":"Male","age":23,"experience_years":16,"monthly_salary":79021,"satisfaction_score":6,"training_hours":57,"attendance_percent":84,"performance_rating":3,"overtime_hours":0,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E031","department":"IT","gender":"Female","age":23,"experience_years":9,"monthly_salary":91412,"satisfaction_score":5,"training_hours":46,"attendance_percent":70,"performance_rating":5,"overtime_hours":7,"attrition":"Yes","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E032","department":"Finance","gender":"Male","age":49,"experience_years":4,"monthly_salary":83335,"satisfaction_score":3,"training_hours":43,"attendance_percent":90,"performance_rating":5,"overtime_hours":16,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E033","department":"Finance","gender":"Male","age":43,"experience_years":1,"monthly_salary":81179,"satisfaction_score":3,"training_hours":18,"attendance_percent":91,"performance_rating":4,"overtime_hours":2,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E034","department":"HR","gender":"Male","age":44,"experience_years":4,"monthly_salary":57093,"satisfaction_score":4,"training_hours":35,"attendance_percent":91,"performance_rating":1,"overtime_hours":19,"attrition":"No","recruitment_source":"Referral","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E035","department":"IT","gender":"Male","age":26,"experience_years":1,"monthly_salary":94678,"satisfaction_score":5,"training_hours":9,"attendance_percent":72,"performance_rating":1,"overtime_hours":14,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E036","department":"Operations","gender":"Male","age":22,"experience_years":14,"monthly_salary":105738,"satisfaction_score":6,"training_hours":39,"attendance_percent":85,"performance_rating":2,"overtime_hours":14,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E037","department":"IT","gender":"Female","age":22,"experience_years":16,"monthly_salary":64734,"satisfaction_score":7,"training_hours":27,"attendance_percent":92,"performance_rating":4,"overtime_hours":23,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E038","department":"Operations","gender":"Female","age":40,"experience_years":8,"monthly_salary":97615,"satisfaction_score":7,"training_hours":33,"attendance_percent":94,"performance_rating":2,"overtime_hours":21,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E039","department":"HR","gender":"Female","age":23,"experience_years":7,"monthly_salary":98523,"satisfaction_score":6,"training_hours":47,"attendance_percent":80,"performance_rating":2,"overtime_hours":13,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E040","department":"Sales","gender":"Male","age":42,"experience_years":3,"monthly_salary":119476,"satisfaction_score":9,"training_hours":15,"attendance_percent":81,"performance_rating":2,"overtime_hours":22,"attrition":"No","recruitment_source":"Campus","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E041","department":"Finance","gender":"Male","age":33,"experience_years":17,"monthly_salary":42019,"satisfaction_score":8,"training_hours":22,"attendance_percent":79,"performance_rating":3,"overtime_hours":13,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E042","department":"HR","gender":"Male","age":47,"experience_years":1,"monthly_salary":108613,"satisfaction_score":4,"training_hours":51,"attendance_percent":85,"performance_rating":3,"overtime_hours":23,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E043","department":"Finance","gender":"Female","age":27,"experience_years":16,"monthly_salary":116794,"satisfaction_score":7,"training_hours":16,"attendance_percent":77,"performance_rating":2,"overtime_hours":1,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E044","department":"Sales","gender":"Male","age":44,"experience_years":12,"monthly_salary":111672,"satisfaction_score":5,"training_hours":13,"attendance_percent":75,"performance_rating":4,"overtime_hours":12,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E045","department":"Sales","gender":"Male","age":25,"experience_years":19,"monthly_salary":98847,"satisfaction_score":4,"training_hours":14,"attendance_percent":81,"performance_rating":1,"overtime_hours":13,"attrition":"Yes","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E046","department":"HR","gender":"Female","age":44,"experience_years":14,"monthly_salary":107750,"satisfaction_score":5,"training_hours":48,"attendance_percent":93,"performance_rating":4,"overtime_hours":23,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E047","department":"Sales","gender":"Male","age":32,"experience_years":6,"monthly_salary":104634,"satisfaction_score":9,"training_hours":21,"attendance_percent":97,"performance_rating":5,"overtime_hours":18,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E048","department":"Operations","gender":"Female","age":45,"experience_years":6,"monthly_salary":53251,"satisfaction_score":3,"training_hours":42,"attendance_percent":90,"performance_rating":3,"overtime_hours":6,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E049","department":"Sales","gender":"Female","age":48,"experience_years":13,"monthly_salary":50945,"satisfaction_score":4,"training_hours":11,"attendance_percent":77,"performance_rating":1,"overtime_hours":2,"attrition":"Yes","recruitment_source":"Campus","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E050","department":"Finance","gender":"Female","age":38,"experience_years":19,"monthly_salary":115852,"satisfaction_score":7,"training_hours":50,"attendance_percent":95,"performance_rating":1,"overtime_hours":14,"attrition":"Yes","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E051","department":"Finance","gender":"Male","age":27,"experience_years":8,"monthly_salary":57217,"satisfaction_score":4,"training_hours":17,"attendance_percent":97,"performance_rating":5,"overtime_hours":22,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E052","department":"Finance","gender":"Male","age":45,"experience_years":2,"monthly_salary":33308,"satisfaction_score":4,"training_hours":44,"attendance_percent":73,"performance_rating":5,"overtime_hours":13,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E053","department":"Finance","gender":"Male","age":26,"experience_years":1,"monthly_salary":30949,"satisfaction_score":4,"training_hours":46,"attendance_percent":95,"performance_rating":2,"overtime_hours":10,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E054","department":"Operations","gender":"Male","age":41,"experience_years":15,"monthly_salary":76990,"satisfaction_score":8,"training_hours":13,"attendance_percent":77,"performance_rating":3,"overtime_hours":14,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E055","department":"IT","gender":"Male","age":23,"experience_years":1,"monthly_salary":26150,"satisfaction_score":4,"training_hours":54,"attendance_percent":95,"performance_rating":3,"overtime_hours":12,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E056","department":"HR","gender":"Male","age":27,"experience_years":5,"monthly_salary":114480,"satisfaction_score":5,"training_hours":31,"attendance_percent":97,"performance_rating":4,"overtime_hours":17,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E057","department":"Finance","gender":"Male","age":43,"experience_years":16,"monthly_salary":99740,"satisfaction_score":3,"training_hours":6,"attendance_percent":87,"performance_rating":2,"overtime_hours":5,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E058","department":"Sales","gender":"Female","age":32,"experience_years":19,"monthly_salary":91617,"satisfaction_score":9,"training_hours":9,"attendance_percent":97,"performance_rating":2,"overtime_hours":2,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E059","department":"Finance","gender":"Male","age":37,"experience_years":4,"monthly_salary":119841,"satisfaction_score":6,"training_hours":33,"attendance_percent":97,"performance_rating":2,"overtime_hours":18,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E060","department":"Sales","gender":"Female","age":37,"experience_years":3,"monthly_salary":41896,"satisfaction_score":4,"training_hours":41,"attendance_percent":74,"performance_rating":2,"overtime_hours":14,"attrition":"Yes","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E061","department":"Sales","gender":"Male","age":22,"experience_years":17,"monthly_salary":71175,"satisfaction_score":7,"training_hours":42,"attendance_percent":78,"performance_rating":3,"overtime_hours":24,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E062","department":"Finance","gender":"Male","age":30,"experience_years":17,"monthly_salary":32805,"satisfaction_score":4,"training_hours":23,"attendance_percent":73,"performance_rating":3,"overtime_hours":22,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E063","department":"Operations","gender":"Male","age":49,"experience_years":12,"monthly_salary":30237,"satisfaction_score":7,"training_hours":12,"attendance_percent":96,"performance_rating":2,"overtime_hours":4,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E064","department":"Sales","gender":"Female","age":48,"experience_years":14,"monthly_salary":45056,"satisfaction_score":5,"training_hours":52,"attendance_percent":91,"performance_rating":4,"overtime_hours":9,"attrition":"Yes","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E065","department":"Sales","gender":"Female","age":27,"experience_years":6,"monthly_salary":70543,"satisfaction_score":7,"training_hours":49,"attendance_percent":86,"performance_rating":1,"overtime_hours":6,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E066","department":"Finance","gender":"Female","age":37,"experience_years":3,"monthly_salary":81556,"satisfaction_score":6,"training_hours":5,"attendance_percent":78,"performance_rating":1,"overtime_hours":24,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E067","department":"Sales","gender":"Female","age":24,"experience_years":9,"monthly_salary":28343,"satisfaction_score":3,"training_hours":26,"attendance_percent":70,"performance_rating":4,"overtime_hours":16,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E068","department":"Sales","gender":"Male","age":41,"experience_years":5,"monthly_salary":38500,"satisfaction_score":7,"training_hours":56,"attendance_percent":90,"performance_rating":2,"overtime_hours":6,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E069","department":"Finance","gender":"Female","age":49,"experience_years":17,"monthly_salary":78222,"satisfaction_score":7,"training_hours":21,"attendance_percent":89,"performance_rating":3,"overtime_hours":21,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E070","department":"Finance","gender":"Male","age":48,"experience_years":14,"monthly_salary":54375,"satisfaction_score":3,"training_hours":11,"attendance_percent":82,"performance_rating":1,"overtime_hours":11,"attrition":"Yes","recruitment_source":"Campus","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E071","department":"HR","gender":"Male","age":25,"experience_years":3,"monthly_salary":34662,"satisfaction_score":6,"training_hours":29,"attendance_percent":97,"performance_rating":5,"overtime_hours":24,"attrition":"Yes","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E072","department":"Operations","gender":"Female","age":40,"experience_years":1,"monthly_salary":41964,"satisfaction_score":4,"training_hours":49,"attendance_percent":85,"performance_rating":5,"overtime_hours":16,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E073","department":"Operations","gender":"Female","age":47,"experience_years":1,"monthly_salary":84638,"satisfaction_score":7,"training_hours":8,"attendance_percent":98,"performance_rating":4,"overtime_hours":12,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E074","department":"Sales","gender":"Female","age":24,"experience_years":3,"monthly_salary":98666,"satisfaction_score":3,"training_hours":40,"attendance_percent":82,"performance_rating":2,"overtime_hours":19,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Promoted"},{"employee_id":"E075","department":"Operations","gender":"Female","age":40,"experience_years":18,"monthly_salary":110067,"satisfaction_score":5,"training_hours":10,"attendance_percent":83,"performance_rating":1,"overtime_hours":24,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E076","department":"Sales","gender":"Female","age":41,"experience_years":10,"monthly_salary":92215,"satisfaction_score":3,"training_hours":35,"attendance_percent":72,"performance_rating":2,"overtime_hours":3,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E077","department":"HR","gender":"Female","age":28,"experience_years":3,"monthly_salary":94042,"satisfaction_score":5,"training_hours":23,"attendance_percent":98,"performance_rating":1,"overtime_hours":9,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E078","department":"Finance","gender":"Female","age":41,"experience_years":8,"monthly_salary":38284,"satisfaction_score":6,"training_hours":48,"attendance_percent":75,"performance_rating":4,"overtime_hours":2,"attrition":"No","recruitment_source":"Campus","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E079","department":"Finance","gender":"Female","age":30,"experience_years":14,"monthly_salary":97789,"satisfaction_score":4,"training_hours":58,"attendance_percent":87,"performance_rating":4,"overtime_hours":8,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E080","department":"Finance","gender":"Male","age":22,"experience_years":18,"monthly_salary":109664,"satisfaction_score":3,"training_hours":43,"attendance_percent":88,"performance_rating":5,"overtime_hours":12,"attrition":"No","recruitment_source":"Referral","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E081","department":"Operations","gender":"Female","age":29,"experience_years":15,"monthly_salary":118468,"satisfaction_score":9,"training_hours":31,"attendance_percent":74,"performance_rating":2,"overtime_hours":17,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E082","department":"HR","gender":"Female","age":28,"experience_years":2,"monthly_salary":86389,"satisfaction_score":9,"training_hours":14,"attendance_percent":84,"performance_rating":5,"overtime_hours":14,"attrition":"No","recruitment_source":"Campus","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E083","department":"Operations","gender":"Male","age":39,"experience_years":10,"monthly_salary":34435,"satisfaction_score":8,"training_hours":30,"attendance_percent":94,"performance_rating":2,"overtime_hours":3,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E084","department":"Operations","gender":"Female","age":29,"experience_years":2,"monthly_salary":79340,"satisfaction_score":7,"training_hours":23,"attendance_percent":71,"performance_rating":5,"overtime_hours":14,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E085","department":"HR","gender":"Male","age":22,"experience_years":17,"monthly_salary":69078,"satisfaction_score":6,"training_hours":43,"attendance_percent":79,"performance_rating":3,"overtime_hours":21,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E086","department":"HR","gender":"Male","age":32,"experience_years":8,"monthly_salary":103832,"satisfaction_score":3,"training_hours":7,"attendance_percent":93,"performance_rating":3,"overtime_hours":1,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E087","department":"HR","gender":"Female","age":49,"experience_years":1,"monthly_salary":76293,"satisfaction_score":9,"training_hours":49,"attendance_percent":99,"performance_rating":3,"overtime_hours":14,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E088","department":"HR","gender":"Male","age":46,"experience_years":9,"monthly_salary":103781,"satisfaction_score":7,"training_hours":17,"attendance_percent":87,"performance_rating":3,"overtime_hours":7,"attrition":"Yes","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Promoted"},{"employee_id":"E089","department":"Finance","gender":"Male","age":46,"experience_years":11,"monthly_salary":85403,"satisfaction_score":9,"training_hours":54,"attendance_percent":96,"performance_rating":1,"overtime_hours":7,"attrition":"No","recruitment_source":"Referral","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E090","department":"IT","gender":"Male","age":39,"experience_years":16,"monthly_salary":54124,"satisfaction_score":3,"training_hours":32,"attendance_percent":82,"performance_rating":3,"overtime_hours":16,"attrition":"No","recruitment_source":"Campus","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E091","department":"IT","gender":"Male","age":44,"experience_years":7,"monthly_salary":68919,"satisfaction_score":5,"training_hours":24,"attendance_percent":74,"performance_rating":4,"overtime_hours":11,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E092","department":"HR","gender":"Female","age":31,"experience_years":10,"monthly_salary":60247,"satisfaction_score":3,"training_hours":32,"attendance_percent":92,"performance_rating":4,"overtime_hours":18,"attrition":"No","recruitment_source":"Referral","engagement_level":"Low","promotion_status":"Not Promoted"},{"employee_id":"E093","department":"IT","gender":"Male","age":24,"experience_years":3,"monthly_salary":119758,"satisfaction_score":8,"training_hours":12,"attendance_percent":93,"performance_rating":1,"overtime_hours":9,"attrition":"No","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E094","department":"IT","gender":"Female","age":28,"experience_years":18,"monthly_salary":116747,"satisfaction_score":3,"training_hours":45,"attendance_percent":70,"performance_rating":3,"overtime_hours":8,"attrition":"Yes","recruitment_source":"Job Portal","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E095","department":"HR","gender":"Male","age":49,"experience_years":13,"monthly_salary":87752,"satisfaction_score":3,"training_hours":43,"attendance_percent":91,"performance_rating":3,"overtime_hours":4,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Not Promoted"},{"employee_id":"E096","department":"IT","gender":"Male","age":37,"experience_years":7,"monthly_salary":81573,"satisfaction_score":8,"training_hours":5,"attendance_percent":70,"performance_rating":3,"overtime_hours":5,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E097","department":"Operations","gender":"Male","age":47,"experience_years":4,"monthly_salary":84101,"satisfaction_score":6,"training_hours":7,"attendance_percent":87,"performance_rating":5,"overtime_hours":19,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E098","department":"Sales","gender":"Male","age":37,"experience_years":13,"monthly_salary":51646,"satisfaction_score":3,"training_hours":17,"attendance_percent":84,"performance_rating":2,"overtime_hours":1,"attrition":"No","recruitment_source":"LinkedIn","engagement_level":"High","promotion_status":"Promoted"},{"employee_id":"E099","department":"Sales","gender":"Female","age":46,"experience_years":1,"monthly_salary":48049,"satisfaction_score":8,"training_hours":32,"attendance_percent":86,"performance_rating":5,"overtime_hours":23,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Not Promoted"},{"employee_id":"E100","department":"HR","gender":"Female","age":41,"experience_years":8,"monthly_salary":104605,"satisfaction_score":7,"training_hours":53,"attendance_percent":80,"performance_rating":2,"overtime_hours":12,"attrition":"No","recruitment_source":"Referral","engagement_level":"Medium","promotion_status":"Promoted"}];
+
+const DEPTS = ['Finance','Operations','IT','Sales','HR'];
+const SOURCES = ['LinkedIn','Job Portal','Referral','Campus'];
+const COLORS = {
+  accent1:'#6c63ff', accent2:'#00d4aa', accent3:'#ff6b6b', accent4:'#ffc542',
+  pink:'#ff9ff3', blue:'#54a0ff', orange:'#ff9f43', teal:'#1dd1a1'
+};
+const DEPT_COLORS = ['#6c63ff','#00d4aa','#ff6b6b','#ffc542','#ff9ff3'];
+const SRC_COLORS  = ['#54a0ff','#ff9f43','#6c63ff','#00d4aa'];
+
+let activeDepts = new Set();
+let activeSrcs  = new Set();
+let charts = {};
+
+function getData() {
+  return RAW.filter(r =>
+    (activeDepts.size === 0 || activeDepts.has(r.department)) &&
+    (activeSrcs.size === 0  || activeSrcs.has(r.recruitment_source))
+  );
+}
+
+function avg(arr, key) {
+  if (!arr.length) return 0;
+  return arr.reduce((s,r) => s+r[key], 0) / arr.length;
+}
+function groupBy(arr, key) {
+  return arr.reduce((m, r) => { m[r[key]] = (m[r[key]]||0)+1; return m; }, {});
+}
+function groupAvg(arr, groupKey, valKey) {
+  const sums = {}, counts = {};
+  arr.forEach(r => {
+    sums[r[groupKey]]   = (sums[r[groupKey]]||0) + r[valKey];
+    counts[r[groupKey]] = (counts[r[groupKey]]||0)+1;
+  });
+  return Object.keys(sums).map(k => ({ key: k, val: sums[k]/counts[k] }));
+}
+
+// Build slicer buttons
+function buildSlicers() {
+  const ds = document.getElementById('dept-slicers');
+  DEPTS.forEach(d => {
+    const b = document.createElement('button');
+    b.className = 'slicer-btn'; b.textContent = d;
+    b.onclick = () => toggleFilter(activeDepts, d, b);
+    ds.appendChild(b);
+  });
+  const rs = document.getElementById('rec-slicers');
+  SOURCES.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'slicer-btn'; b.textContent = s;
+    b.onclick = () => toggleFilter(activeSrcs, s, b);
+    rs.appendChild(b);
+  });
+}
+
+function toggleFilter(set, val, btn) {
+  if (set.has(val)) { set.delete(val); btn.classList.remove('active'); }
+  else              { set.add(val);    btn.classList.add('active'); }
+  render();
+}
+function resetFilters() {
+  activeDepts.clear(); activeSrcs.clear();
+  document.querySelectorAll('.slicer-btn').forEach(b => b.classList.remove('active'));
+  render();
+}
+
+// KPI Cards
+function renderKPIs(data) {
+  const attrCount = data.filter(r=>r.attrition==='Yes').length;
+  const attrRate  = data.length ? ((attrCount/data.length)*100).toFixed(1) : 0;
+  const avgSal    = data.length ? Math.round(avg(data,'monthly_salary')).toLocaleString() : 0;
+  const avgSat    = data.length ? avg(data,'satisfaction_score').toFixed(1) : 0;
+  const avgPerf   = data.length ? avg(data,'performance_rating').toFixed(1) : 0;
+  const promoted  = data.filter(r=>r.promotion_status==='Promoted').length;
+  const kpis = [
+    { label:'Total Employees', value: data.length, sub:'in current filter', icon:'👥', cls:'c1' },
+    { label:'Attrition Rate',  value: attrRate+'%', sub:`${attrCount} employees left`, icon:'📉', cls:'c3' },
+    { label:'Avg Monthly Salary', value:'₹'+avgSal, sub:'across all departments', icon:'💰', cls:'c4' },
+    { label:'Avg Satisfaction', value: avgSat+'/10', sub:'employee satisfaction score', icon:'😊', cls:'c2' },
+    { label:'Avg Performance', value: avgPerf+'/5', sub:'performance rating avg', icon:'⭐', cls:'c5' },
+    { label:'Promoted', value: promoted, sub:`of ${data.length} employees`, icon:'🚀', cls:'c6' },
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k=>`
+    <div class="kpi-card ${k.cls}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>
+  `).join('');
+}
+
+// Chart helpers
+const baseChartOpts = {
+  responsive: true,
+  plugins: { legend: { labels: { color:'#7b82a8', font:{size:12,family:'Plus Jakarta Sans'} } } },
+  scales: {
+    x: { ticks:{ color:'#7b82a8', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' } },
+    y: { ticks:{ color:'#7b82a8', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.06)' } }
+  }
+};
+const pieOpts = {
+  responsive: true,
+  plugins: {
+    legend: { position:'right', labels:{ color:'#7b82a8', font:{size:12,family:'Plus Jakarta Sans'}, padding:14 } }
+  }
+};
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function render() {
+  const data = getData();
+
+  renderKPIs(data);
+
+  // 1. Dept Bar
+  destroyChart('deptBar');
+  const deptCounts = DEPTS.map(d => data.filter(r=>r.department===d).length);
+  charts.deptBar = new Chart(document.getElementById('deptBar'), {
+    type:'bar',
+    data:{
+      labels: DEPTS,
+      datasets:[{ label:'Employees', data:deptCounts,
+        backgroundColor: DEPT_COLORS.map(c=>c+'bb'), borderColor:DEPT_COLORS, borderWidth:1.5, borderRadius:6 }]
+    },
+    options:{...baseChartOpts, plugins:{...baseChartOpts.plugins, legend:{display:false}}}
+  });
+
+  // 2. Recruitment Pie
+  destroyChart('recruitPie');
+  const srcCounts = SOURCES.map(s => data.filter(r=>r.recruitment_source===s).length);
+  charts.recruitPie = new Chart(document.getElementById('recruitPie'), {
+    type:'doughnut',
+    data:{ labels:SOURCES, datasets:[{ data:srcCounts, backgroundColor:SRC_COLORS.map(c=>c+'cc'), borderColor:SRC_COLORS, borderWidth:2 }] },
+    options:{...pieOpts, cutout:'62%'}
+  });
+
+  // 3. Attrition Stacked Bar
+  destroyChart('attritionBar');
+  const attrYes = DEPTS.map(d => data.filter(r=>r.department===d&&r.attrition==='Yes').length);
+  const attrNo  = DEPTS.map(d => data.filter(r=>r.department===d&&r.attrition==='No').length);
+  charts.attritionBar = new Chart(document.getElementById('attritionBar'), {
+    type:'bar',
+    data:{
+      labels:DEPTS,
+      datasets:[
+        { label:'Stayed', data:attrNo,  backgroundColor:'#00d4aa88', borderColor:'#00d4aa', borderWidth:1.5, borderRadius:6 },
+        { label:'Left',   data:attrYes, backgroundColor:'#ff6b6b88', borderColor:'#ff6b6b', borderWidth:1.5, borderRadius:6 }
+      ]
+    },
+    options:{...baseChartOpts, plugins:{...baseChartOpts.plugins}, scales:{...baseChartOpts.scales}}
+  });
+
+  // 4. Engagement Pie
+  destroyChart('engagePie');
+  const engLevels = ['Low','Medium','High'];
+  const engCounts = engLevels.map(l => data.filter(r=>r.engagement_level===l).length);
+  charts.engagePie = new Chart(document.getElementById('engagePie'), {
+    type:'pie',
+    data:{ labels:engLevels, datasets:[{ data:engCounts, backgroundColor:['#ff6b6b99','#ffc54299','#00d4aa99'], borderColor:['#ff6b6b','#ffc542','#00d4aa'], borderWidth:2 }] },
+    options:pieOpts
+  });
+
+  // 5. Salary Bar
+  destroyChart('salaryBar');
+  const salData = DEPTS.map(d => {
+    const sub = data.filter(r=>r.department===d);
+    return sub.length ? Math.round(avg(sub,'monthly_salary')) : 0;
+  });
+  charts.salaryBar = new Chart(document.getElementById('salaryBar'), {
+    type:'bar',
+    data:{
+      labels:DEPTS,
+      datasets:[{ label:'Avg Salary (₹)', data:salData,
+        backgroundColor:DEPT_COLORS.map(c=>c+'99'), borderColor:DEPT_COLORS, borderWidth:1.5, borderRadius:6 }]
+    },
+    options:{...baseChartOpts, plugins:{...baseChartOpts.plugins, legend:{display:false}}}
+  });
+
+  // 6. Gender Pie
+  destroyChart('genderPie');
+  const maleCount   = data.filter(r=>r.gender==='Male').length;
+  const femaleCount = data.filter(r=>r.gender==='Female').length;
+  charts.genderPie = new Chart(document.getElementById('genderPie'), {
+    type:'doughnut',
+    data:{ labels:['Male','Female'], datasets:[{ data:[maleCount,femaleCount], backgroundColor:['#54a0ffaa','#ff9ff3aa'], borderColor:['#54a0ff','#ff9ff3'], borderWidth:2 }] },
+    options:{...pieOpts, cutout:'60%'}
+  });
+
+  // 7. Promotion Pie
+  destroyChart('promotionPie');
+  const promYes = data.filter(r=>r.promotion_status==='Promoted').length;
+  const promNo  = data.filter(r=>r.promotion_status==='Not Promoted').length;
+  charts.promotionPie = new Chart(document.getElementById('promotionPie'), {
+    type:'doughnut',
+    data:{ labels:['Promoted','Not Promoted'], datasets:[{ data:[promYes,promNo], backgroundColor:['#6c63ffaa','#ff6b6b44'], borderColor:['#6c63ff','#ff6b6b'], borderWidth:2 }] },
+    options:{...pieOpts, cutout:'60%'}
+  });
+
+  // 8. Performance by Source Bar
+  destroyChart('perfBar');
+  const perfBySrc = SOURCES.map(s => {
+    const sub = data.filter(r=>r.recruitment_source===s);
+    return sub.length ? +avg(sub,'performance_rating').toFixed(2) : 0;
+  });
+  charts.perfBar = new Chart(document.getElementById('perfBar'), {
+    type:'bar',
+    data:{
+      labels:SOURCES,
+      datasets:[{ label:'Avg Performance Rating', data:perfBySrc,
+        backgroundColor:SRC_COLORS.map(c=>c+'99'), borderColor:SRC_COLORS, borderWidth:1.5, borderRadius:6 }]
+    },
+    options:{...baseChartOpts, plugins:{...baseChartOpts.plugins, legend:{display:false}}, scales:{...baseChartOpts.scales, y:{...baseChartOpts.scales.y, max:5}}}
+  });
+
+  // 9. Satisfaction by Dept Bar
+  destroyChart('satBar');
+  const satByDept = DEPTS.map(d => {
+    const sub = data.filter(r=>r.department===d);
+    return sub.length ? +avg(sub,'satisfaction_score').toFixed(2) : 0;
+  });
+  charts.satBar = new Chart(document.getElementById('satBar'), {
+    type:'bar',
+    data:{
+      labels:DEPTS,
+      datasets:[{ label:'Avg Satisfaction Score', data:satByDept,
+        backgroundColor:DEPT_COLORS.map(c=>c+'99'), borderColor:DEPT_COLORS, borderWidth:1.5, borderRadius:6 }]
+    },
+    options:{...baseChartOpts, plugins:{...baseChartOpts.plugins, legend:{display:false}}, scales:{...baseChartOpts.scales, y:{...baseChartOpts.scales.y, max:10}}}
+  });
+}
+
+buildSlicers();
+render();
+</script>
+
+
+</body></html>
